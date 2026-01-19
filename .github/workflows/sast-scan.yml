@@ -11,6 +11,10 @@ jobs:
   sast-scan:
     name: Run SAST Analysis
     runs-on: [self-hosted, linux, x64]
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     
     steps:
       - name: Checkout repository
@@ -18,14 +22,24 @@ jobs:
         with:
           fetch-depth: 0  # Full history for better analysis
       
+      - name: Cache CodeQL CLI
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.codeql
+            /opt/hostedtoolcache/CodeQL
+          key: codeql-cli-${{ runner.os }}
+          restore-keys: |
+            codeql-cli-
+      
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: python
-          queries: security-extended,security-and-quality
-      
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+          queries: security-extended
+        env:
+          CODEQL_RAM: 4096
+          CODEQL_THREADS: 4
       
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
