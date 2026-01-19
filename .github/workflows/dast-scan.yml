@@ -22,11 +22,18 @@ jobs:
         run: |
           mkdir -p dast-reports
           chmod 777 dast-reports
+          pwd
+          ls -la
+      
+      - name: Test Docker access
+        run: |
+          docker --version
+          docker ps
       
       - name: Run OWASP ZAP Full Scan
         run: |
           docker run --rm \
-            -v ${{ github.workspace }}/dast-reports:/zap/wrk/:rw \
+            -v "$(pwd)/dast-reports:/zap/wrk/:rw" \
             zaproxy/zap-stable zap-full-scan.py \
             -t https://tufapp.adgone.co.tz/ \
             -r full-scan-report.html \
