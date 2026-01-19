@@ -21,18 +21,19 @@ jobs:
       - name: Create reports directory
         run: |
           mkdir -p dast-reports
-          chmod 777 dast-reports
+          chmod -R 777 dast-reports
+          # Verify permissions
+          ls -la dast-reports/
           pwd
-          ls -la
       
       - name: Test Docker access
         run: |
           docker --version
-          docker ps
       
       - name: Run OWASP ZAP Full Scan
         run: |
           docker run --rm \
+            --user root \
             -v "$(pwd)/dast-reports:/zap/wrk/:rw" \
             zaproxy/zap-stable zap-full-scan.py \
             -t https://tufapp.adgone.co.tz/ \
@@ -45,6 +46,11 @@ jobs:
             -m 10 \
             -z "-config api.disablekey=true -config spider.maxDuration=30 -config scanner.maxRuleDurationInMins=30"
         continue-on-error: true
+      
+      - name: Fix report permissions
+        if: always()
+        run: |
+          chmod -R 755 dast-reports/ 2>/dev/null || true
       
       - name: Generate comprehensive text summary
         run: |
