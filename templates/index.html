@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Tracker - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 Sports Tracker</h1>
+            <p class="tagline">Track Your Passion, Share Your Sport</p>
+        </header>
+
+        <main class="home-content">
+            <section class="welcome-section">
+                <h2>Why Sports Matter</h2>
+                <p>
+                    Sports play a vital role in our physical and mental well-being. Whether you're into team sports 
+                    like basketball and soccer, individual pursuits like running and swimming, or adventure sports 
+                    like rock climbing, staying active keeps us healthy, focused, and connected.
+                </p>
+                <p>
+                    Join our community to share your favorite sport and discover what others are passionate about. 
+                    Physical activity isn't just about fitness—it's about building discipline, reducing stress, 
+                    and creating lifelong memories.
+                </p>
+                <div class="benefits">
+                    <div class="benefit-card">
+                        <span class="icon">💪</span>
+                        <h3>Physical Health</h3>
+                        <p>Improve strength, endurance, and overall fitness</p>
+                    </div>
+                    <div class="benefit-card">
+                        <span class="icon">🧠</span>
+                        <h3>Mental Clarity</h3>
+                        <p>Reduce stress and boost cognitive function</p>
+                    </div>
+                    <div class="benefit-card">
+                        <span class="icon">🤝</span>
+                        <h3>Community</h3>
+                        <p>Connect with others who share your interests</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="action-section">
+                <h2>Get Started</h2>
+                <div class="button-group">
+                    <a href="{{ url_for('signup') }}" class="btn btn-primary">
+                        <span class="btn-icon">✨</span>
+                        Sign Up
+                    </a>
+                    <a href="{{ url_for('search') }}" class="btn btn-secondary">
+                        <span class="btn-icon">🔍</span>
+                        Search Users
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Sports Tracker. Stay Active, Stay Healthy.</p>
+        </footer>
+    </div>
+</body>
+</html>

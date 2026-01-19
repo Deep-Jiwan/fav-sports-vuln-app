@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  sports-tracker:
+    build: .
+    container_name: sports-tracker-app
+    ports:
+      - "3000:3000"
+    environment:
+      - SECRET_KEY=change-this-in-production-to-a-secure-random-key
+    restart: unless-stopped

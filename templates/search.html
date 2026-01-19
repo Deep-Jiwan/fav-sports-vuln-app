@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Users - Sports Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 Sports Tracker</h1>
+            <nav>
+                <a href="{{ url_for('index') }}" class="nav-link">← Back to Home</a>
+            </nav>
+        </header>
+
+        <main class="form-content">
+            <div class="form-card">
+                <h2>Search Users</h2>
+                <p class="form-description">Find out what sports other users are passionate about!</p>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('search') }}" class="search-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <div class="search-input-group">
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                placeholder="Enter username to search" 
+                                required
+                                value="{{ search_username }}"
+                                autocomplete="off"
+                            >
+                            <button type="submit" class="btn btn-primary">
+                                🔍 Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if result %}
+                    <div class="search-results">
+                        {% if result.found %}
+                            <div class="result-card result-success">
+                                <div class="result-icon">✅</div>
+                                <h3>Results Found!</h3>
+                                <div class="result-details">
+                                    {% for item in result.data %}
+                                        <div class="result-item">
+                                            <p class="result-label">Username:</p>
+                                            <p class="result-value">{{ item.username }}</p>
+                                            
+                                            <p class="result-label">Favorite Sport:</p>
+                                            <p class="result-value sport-highlight">🏅 {{ item.sport }}</p>
+                                        </div>
+                                        {% if not loop.last %}
+                                            <hr style="margin: 1.5rem 0; border: 1px solid #e2e8f0;">
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="result-card result-notfound">
+                                <div class="result-icon">❌</div>
+                                <h3>User Not Found</h3>
+                                <p>No user found with username: <strong>{{ result.username }}</strong></p>
+                                <p class="result-hint">Double-check the spelling or <a href="{{ url_for('signup') }}">create a new account</a>.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <div class="form-footer">
+                    <p>New here? <a href="{{ url_for('signup') }}">Sign up now</a></p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Sports Tracker</p>
+        </footer>
+    </div>
+</body>
+</html>

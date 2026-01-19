@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Sports Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 Sports Tracker</h1>
+            <nav>
+                <a href="{{ url_for('index') }}" class="nav-link">← Back to Home</a>
+            </nav>
+        </header>
+
+        <main class="form-content">
+            <div class="form-card">
+                <h2>Create Your Account</h2>
+                <p class="form-description">Join our community and share your favorite sport!</p>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('signup') }}" class="signup-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            placeholder="Choose a username" 
+                            required 
+                            minlength="3"
+                            autocomplete="username"
+                        >
+                        <small>At least 3 characters</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Create a secure password" 
+                            required 
+                            minlength="6"
+                            autocomplete="new-password"
+                        >
+                        <small>At least 6 characters</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sport">Favorite Sport</label>
+                        <input 
+                            type="text" 
+                            id="sport" 
+                            name="sport" 
+                            placeholder="e.g., Basketball, Swimming, Soccer" 
+                            required
+                            list="sports-suggestions"
+                        >
+                        <datalist id="sports-suggestions">
+                            <option value="Basketball">
+                            <option value="Soccer">
+                            <option value="Tennis">
+                            <option value="Swimming">
+                            <option value="Running">
+                            <option value="Cycling">
+                            <option value="Volleyball">
+                            <option value="Baseball">
+                            <option value="Golf">
+                            <option value="Rock Climbing">
+                        </datalist>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        Create Account
+                    </button>
+                </form>
+
+                <div class="form-footer">
+                    <p>Already a member? <a href="{{ url_for('search') }}">Search for users</a></p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Sports Tracker</p>
+        </footer>
+    </div>
+</body>
+</html>
