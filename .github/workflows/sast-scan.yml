@@ -22,16 +22,6 @@ jobs:
         with:
           fetch-depth: 0  # Full history for better analysis
       
-      - name: Cache CodeQL CLI
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.codeql
-            /opt/hostedtoolcache/CodeQL
-          key: codeql-cli-${{ runner.os }}
-          restore-keys: |
-            codeql-cli-
-      
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
