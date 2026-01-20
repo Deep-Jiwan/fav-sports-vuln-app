@@ -22,20 +22,12 @@ jobs:
         run: |
           mkdir -p dast-reports
           chmod -R 777 dast-reports
-          # Verify permissions and path
+          # Set ownership to match ZAP container user (1000:1000)
+          sudo chown -R 1000:1000 dast-reports 2>/dev/null || true
           ls -la dast-reports/
-          echo "Current directory: $(pwd)"
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          echo "Absolute path to reports: $GITHUB_WORKSPACE/dast-reports"
-      
-      - name: Test Docker access
-        run: |
-          docker --version
-          docker info | grep "Operating System"
       
       - name: Run OWASP ZAP Baseline Scan
         run: |
-          # Run ZAP with volume mount - different approach
           docker run --name zap-scan \
             -v "$PWD/dast-reports:/zap/wrk/:rw" \
             zaproxy/zap-stable zap-baseline.py \
@@ -44,19 +36,10 @@ jobs:
             -J full-scan-report.json \
             -a || true
           
-          # List what was created
-          echo "=== Files in dast-reports directory ==="
-          ls -la dast-reports/
+          echo "=== Files created ==="
+          ls -lah dast-reports/
           
-          # Also check inside container just in case
-          echo "=== Files in container /zap/wrk ==="
-          docker exec zap-scan ls -la /zap/wrk/ 2>/dev/null || echo "Container not running or directory not accessible"
-          
-          # Try copying from container as backup
-          docker cp zap-scan:/zap/wrk/full-scan-report.html dast-reports/ 2>/dev/null || echo "Already in dast-reports or not found"
-          docker cp zap-scan:/zap/wrk/full-scan-report.json dast-reports/ 2>/dev/null || echo "Already in dast-reports or not found"
-          
-          # Cleanup
+          # Cleanup container
           docker rm -f zap-scan 2>/dev/null || true
         continue-on-error: true
       
