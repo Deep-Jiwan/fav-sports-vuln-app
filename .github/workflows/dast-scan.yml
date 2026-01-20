@@ -22,19 +22,22 @@ jobs:
         run: |
           mkdir -p dast-reports
           chmod -R 777 dast-reports
-          # Verify permissions
+          # Verify permissions and path
           ls -la dast-reports/
-          pwd
+          echo "Current directory: $(pwd)"
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          echo "Absolute path to reports: $GITHUB_WORKSPACE/dast-reports"
       
       - name: Test Docker access
         run: |
           docker --version
+          docker info | grep "Operating System"
       
       - name: Run OWASP ZAP Baseline Scan
         run: |
           docker run --rm \
             --user root \
-            -v "$(pwd)/dast-reports:/zap/wrk/:rw" \
+            -v "$GITHUB_WORKSPACE/dast-reports:/zap/wrk/:rw" \
             zaproxy/zap-stable zap-baseline.py \
             -t https://tufapp.adgone.co.tz/ \
             -r full-scan-report.html \
