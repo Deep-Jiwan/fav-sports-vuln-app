@@ -18,7 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Prepar Docker volume & container
+      - name: Prepare Docker volume & container
         run: |
           docker volume rm dast-reports-vol 2>/dev/null || true
           docker volume create dast-reports-vol
@@ -29,11 +29,16 @@ jobs:
           docker run --name zap-scan \
             --user root \
             -v "dast-reports-vol:/zap/wrk:rw" \
-            zaproxy/zap-stable zap-baseline.py \
+            zaproxy/zap-stable zap-full-scan.py \
             -t https://tufapp.adgone.co.tz/ \
             -r full-scan-report.html \
+            -w full-scan-report.md \
             -J full-scan-report.json \
-            -a || true
+            -x full-scan-report.xml \
+            -a \
+            -j \
+            -m 10 \
+            -z "-config api.disablekey=true -config spider.maxDuration=30 -config scanner.maxRuleDurationInMins=30"
         continue-on-error: true
       
       - name: Copy reports from Docker volume
@@ -41,8 +46,7 @@ jobs:
           mkdir -p dast-reports
           
           # Copy reports from the named volume via container
-          docker cp zap-scan:/zap/wrk/full-scan-report.html dast-reports/ || echo "HTML report not found"
-          docker cp zap-scan:/zap/wrk/full-scan-report.json dast-reports/ || echo "JSON report not found"
+          docker cp zap-scan:/zap/wrk/. dast-reports/ || echo "Failed to copy reports"
           
           # Cleanup container and volume
           docker rm -f zap-scan 2>/dev/null || true
