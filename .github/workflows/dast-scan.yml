@@ -1,7 +1,7 @@
 name: DAST Security Scan
 
 on:
-  workflow_dispatch:  # Manual trigger only (DAST is intensive)
+  workflow_dispatch:
   schedule:
     - cron: '0 2 * * 0'  # Weekly on Sunday at 2 AM
 
@@ -18,55 +18,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Create reports directory
+      - name: Create Docker volume
         run: |
-          mkdir -p dast-reports
-          chmod -R 777 dast-reports
-          # Verify permissions and path
-          ls -la dast-reports/
-          echo "Current directory: $(pwd)"
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          echo "Absolute path to reports: $GITHUB_WORKSPACE/dast-reports"
-      
-      - name: Test Docker access
-        run: |
-          docker --version
-          docker info | grep "Operating System"
+          docker volume rm dast-reports-vol 2>/dev/null || true
+          docker volume create dast-reports-vol
       
       - name: Run OWASP ZAP Baseline Scan
         run: |
-          # Run ZAP with volume mount - different approach
-          echo $PWD
           docker run --name zap-scan \
-            -v "$PWD/dast-reports:/zap/wrk/:rw" \
+            --user root \
+            -v "dast-reports-vol:/zap/wrk:rw" \
             zaproxy/zap-stable zap-baseline.py \
             -t https://tufapp.adgone.co.tz/ \
             -r full-scan-report.html \
             -J full-scan-report.json \
             -a || true
-          
-          # List what was created
-          echo "=== Files in dast-reports directory ==="
-          ls -la dast-reports/
-          
-          # Also check inside container just in case
-          echo "=== Files in container /zap/wrk ==="
-          docker exec zap-scan ls -la /zap/wrk/ 2>/dev/null || echo "Container not running or directory not accessible"
-          
-          # Try copying from container as backup
-          docker cp zap-scan:/zap/wrk/full-scan-report.html dast-reports/ 2>/dev/null || echo "Already in dast-reports or not found"
-          docker cp zap-scan:/zap/wrk/full-scan-report.json dast-reports/ 2>/dev/null || echo "Already in dast-reports or not found"
-          
-          # Cleanup
-          docker rm -f zap-scan 2>/dev/null || true
         continue-on-error: true
       
-      - name: Fix report permissions
-        if: always()
+      - name: Copy reports from Docker volume
         run: |
-          chmod -R 755 dast-reports/ 2>/dev/null || true
+          mkdir -p dast-reports
+          
+          # Copy reports from the named volume via container
+          docker cp zap-scan:/zap/wrk/full-scan-report.html dast-reports/ || echo "HTML report not found"
+          docker cp zap-scan:/zap/wrk/full-scan-report.json dast-reports/ || echo "JSON report not found"
+          
+          # Cleanup container and volume
+          docker rm -f zap-scan 2>/dev/null || true
+          docker volume rm dast-reports-vol 2>/dev/null || true
       
-      - name: Generate comprehensive text summary
+      - name: Generate scan summary
         run: |
           cat > dast-reports/scan-summary.txt << 'EOF'
           ======================================
@@ -94,21 +75,9 @@ jobs:
           echo "Files generated:" >> dast-reports/scan-summary.txt
           ls -lh dast-reports/ >> dast-reports/scan-summary.txt
       
-      - name: List generated reports
+      - name: Verify reports generated
         if: always()
-        run: |
-          echo "=== Generated DAST Reports ==="
-          ls -lah dast-reports/
-          
-          echo ""
-          echo "=== File sizes ==="
-          du -h dast-reports/*
-          
-          echo ""
-          echo "=== JSON structure preview ==="
-          if [ -f dast-reports/full-scan-report.json ]; then
-            head -n 50 dast-reports/full-scan-report.json
-          fi
+        run: ls -lh dast-reports/
       
       - name: Upload DAST reports as artifacts
         if: always()
