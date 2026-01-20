@@ -22,6 +22,8 @@ jobs:
         run: |
           mkdir -p dast-reports
           chmod -R 777 dast-reports
+          # Set ownership to match ZAP container user (1000:1000)
+          sudo chown -R 1000:1000 dast-reports 2>/dev/null || true
           ls -la dast-reports/
       
       - name: Run OWASP ZAP Baseline Scan
