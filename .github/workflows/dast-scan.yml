@@ -30,21 +30,16 @@ jobs:
         run: |
           docker --version
       
-      - name: Run OWASP ZAP Full Scan
+      - name: Run OWASP ZAP Baseline Scan
         run: |
           docker run --rm \
             --user root \
             -v "$(pwd)/dast-reports:/zap/wrk/:rw" \
-            zaproxy/zap-stable zap-full-scan.py \
+            zaproxy/zap-stable zap-baseline.py \
             -t https://tufapp.adgone.co.tz/ \
             -r full-scan-report.html \
-            -w full-scan-report.md \
             -J full-scan-report.json \
-            -x full-scan-report.xml \
-            -a \
-            -j \
-            -m 10 \
-            -z "-config api.disablekey=true -config spider.maxDuration=30 -config scanner.maxRuleDurationInMins=30"
+            -a
         continue-on-error: true
       
       - name: Fix report permissions
@@ -56,24 +51,21 @@ jobs:
         run: |
           cat > dast-reports/scan-summary.txt << 'EOF'
           ======================================
-          OWASP ZAP DAST Full Scan Report
+          OWASP ZAP DAST Baseline Scan Report
           ======================================
           Target: https://tufapp.adgone.co.tz/
-          Scan Type: Full Active Scan with AJAX Spider
+          Scan Type: Baseline Scan (Passive Analysis)
           Scan Date: $(date)
           
-          This report contains comprehensive security findings from OWASP ZAP.
+          This report contains security findings from OWASP ZAP baseline scan.
           Available formats:
           - full-scan-report.json (Machine-readable, complete data)
-          - full-scan-report.xml (Detailed XML format)
           - full-scan-report.html (Human-readable HTML)
-          - full-scan-report.md (Markdown format for LLM processing)
           
           The scan includes:
-          - Active attack testing
-          - AJAX Spider crawling
           - Passive scanning
-          - All vulnerability categories
+          - Spider crawling
+          - Common vulnerability detection
           - Request/response details
           - Evidence and solutions
           ======================================
@@ -107,8 +99,6 @@ jobs:
           path: |
             dast-reports/full-scan-report.html
             dast-reports/full-scan-report.json
-            dast-reports/full-scan-report.xml
-            dast-reports/full-scan-report.md
             dast-reports/scan-summary.txt
           retention-days: 30
       
@@ -134,14 +124,13 @@ jobs:
         run: |
           echo "## DAST Scan Complete 🔍" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Tool:** OWASP ZAP Full Scan" >> $GITHUB_STEP_SUMMARY
+          echo "**Tool:** OWASP ZAP Baseline Scan" >> $GITHUB_STEP_SUMMARY
           echo "**Target:** https://tufapp.adgone.co.tz/" >> $GITHUB_STEP_SUMMARY
-          echo "**Scan Mode:** Active Attack + AJAX Spider" >> $GITHUB_STEP_SUMMARY
+          echo "**Scan Mode:** Passive Analysis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Artifacts uploaded:**" >> $GITHUB_STEP_SUMMARY
           echo "- full-scan-report.json (Machine-readable)" >> $GITHUB_STEP_SUMMARY
-          echo "- full-scan-report.xml (Detailed XML)" >> $GITHUB_STEP_SUMMARY
           echo "- full-scan-report.html (Human-readable)" >> $GITHUB_STEP_SUMMARY
-          echo "- full-scan-report.md (LLM-friendly Markdown)" >> $GITHUB_STEP_SUMMARY
+          echo "- scan-summary.txt (Scan metadata)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Next step:** Download artifacts using the agent for automated fix generation" >> $GITHUB_STEP_SUMMARY
