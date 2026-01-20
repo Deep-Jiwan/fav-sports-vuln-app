@@ -18,10 +18,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Create Docker volume
+      - name: Prepar Docker volume & container
         run: |
           docker volume rm dast-reports-vol 2>/dev/null || true
           docker volume create dast-reports-vol
+          docker rm -f zap-scan 2>/dev/null || true
       
       - name: Run OWASP ZAP Baseline Scan
         run: |
