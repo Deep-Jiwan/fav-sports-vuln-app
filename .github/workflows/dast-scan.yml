@@ -35,14 +35,25 @@ jobs:
       
       - name: Run OWASP ZAP Baseline Scan
         run: |
-          docker run --rm \
+          # Create a named container to extract files later
+          docker run --name zap-scan \
             --user root \
-            -v "$GITHUB_WORKSPACE/dast-reports:/zap/wrk/:rw" \
             zaproxy/zap-stable zap-baseline.py \
             -t https://tufapp.adgone.co.tz/ \
-            -r full-scan-report.html \
-            -J full-scan-report.json \
-            -a
+            -r /zap/wrk/full-scan-report.html \
+            -J /zap/wrk/full-scan-report.json \
+            -a || true
+          
+          # Copy reports from container to host
+          docker cp zap-scan:/zap/wrk/full-scan-report.html dast-reports/ || echo "HTML report not found"
+          docker cp zap-scan:/zap/wrk/full-scan-report.json dast-reports/ || echo "JSON report not found"
+          
+          # List what's in the container's wrk directory
+          echo "=== Files in ZAP container ==="
+          docker exec zap-scan ls -la /zap/wrk/ || true
+          
+          # Cleanup container
+          docker rm zap-scan || true
         continue-on-error: true
       
       - name: Fix report permissions
