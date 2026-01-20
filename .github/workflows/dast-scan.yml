@@ -35,25 +35,29 @@ jobs:
       
       - name: Run OWASP ZAP Baseline Scan
         run: |
-          # Create a named container to extract files later
+          # Run ZAP with volume mount - different approach
           docker run --name zap-scan \
-            --user root \
+            -v "$PWD/dast-reports:/zap/wrk/:rw" \
             zaproxy/zap-stable zap-baseline.py \
             -t https://tufapp.adgone.co.tz/ \
-            -r /zap/wrk/full-scan-report.html \
-            -J /zap/wrk/full-scan-report.json \
+            -r full-scan-report.html \
+            -J full-scan-report.json \
             -a || true
           
-          # Copy reports from container to host
-          docker cp zap-scan:/zap/wrk/full-scan-report.html dast-reports/ || echo "HTML report not found"
-          docker cp zap-scan:/zap/wrk/full-scan-report.json dast-reports/ || echo "JSON report not found"
+          # List what was created
+          echo "=== Files in dast-reports directory ==="
+          ls -la dast-reports/
           
-          # List what's in the container's wrk directory
-          echo "=== Files in ZAP container ==="
-          docker exec zap-scan ls -la /zap/wrk/ || true
+          # Also check inside container just in case
+          echo "=== Files in container /zap/wrk ==="
+          docker exec zap-scan ls -la /zap/wrk/ 2>/dev/null || echo "Container not running or directory not accessible"
           
-          # Cleanup container
-          docker rm zap-scan || true
+          # Try copying from container as backup
+          docker cp zap-scan:/zap/wrk/full-scan-report.html dast-reports/ 2>/dev/null || echo "Already in dast-reports or not found"
+          docker cp zap-scan:/zap/wrk/full-scan-report.json dast-reports/ 2>/dev/null || echo "Already in dast-reports or not found"
+          
+          # Cleanup
+          docker rm -f zap-scan 2>/dev/null || true
         continue-on-error: true
       
       - name: Fix report permissions
