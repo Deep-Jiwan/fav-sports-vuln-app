@@ -88,6 +88,9 @@ def signup():
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     """Search user page"""
+    from flask import request, render_template
+    from database import get_db_connection
+    
     result = None
     search_username = ''
     
