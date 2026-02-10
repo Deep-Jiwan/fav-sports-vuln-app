@@ -15,8 +15,7 @@ def get_db_connection():
     return conn
 
 def hash_password(password):
-    """Hash password using SHA-256"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    return hashlib.pbkdf2_hmac('sha256', password.encode(), os.urandom(16), 100000).hex()
 
 @app.route('/')
 def index():
