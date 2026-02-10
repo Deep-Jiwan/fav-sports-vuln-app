@@ -86,7 +86,7 @@ def signup():
     return render_template('signup.html')
 
 @app.route('/search', methods=['GET', 'POST'])
-def search():
+def search(request, get_db_connection):
     """Search user page"""
     result = None
     search_username = ''
