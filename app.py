@@ -14,8 +14,9 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+import os
+import hashlib
 def hash_password(password):
-    """Hash password using PBKDF2-HMAC-SHA256"""
     salt = os.urandom(16)
     return hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000).hex()
 
