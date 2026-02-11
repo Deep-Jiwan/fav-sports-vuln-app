@@ -90,41 +90,28 @@ def search():
     """Search user page"""
     result = None
     search_username = ''
-    
+
     if request.method == 'POST':
         search_username = request.form.get('username', '').strip()
-        
+
         if search_username:
             conn = get_db_connection()
             
-            # VULNERABLE: SQL Injection through string concatenation
-            # Allows UNION attacks to extract sensitive data
-            query = "SELECT username, sport FROM sports WHERE username = '" + search_username + "'"
-            cursor = conn.execute(query)
+            # Fixed: Parameterized query to prevent SQL injection
+            query = "SELECT username, sport FROM sports WHERE username = ?"
+            cursor = conn.execute(query, (search_username,))
+            
             user_data = cursor.fetchall()
             
             conn.close()
-            
+
             if user_data:
-                # Display all results (enables data extraction via UNION injection)
                 results_list = []
                 for row in user_data:
                     results_list.append({
                         'username': row['username'] if 'username' in row.keys() else row[0],
                         'sport': row['sport'] if 'sport' in row.keys() else row[1]
                     })
-                
-                result = {
-                    'found': True,
-                    'data': results_list
-                }
-            else:
-                result = {
-                    'found': False,
-                    'username': search_username
-                }
-    
-    return render_template('search.html', result=result, search_username=search_username)
 
 @app.route('/health')
 def health():
