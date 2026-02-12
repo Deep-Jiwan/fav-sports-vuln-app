@@ -89,6 +89,7 @@ def signup():
 def search():
     """Search user page"""
     from flask import request
+    import sqlite3
     result = None
     search_username = ''
     
@@ -96,7 +97,8 @@ def search():
         search_username = request.form.get('username', '').strip()
         
         if search_username:
-            conn = get_db_connection()
+            conn = sqlite3.connect('database.db')
+            conn.row_factory = sqlite3.Row
             
             # FIXED: Use parameterized query to prevent SQL injection
             query = "SELECT username, sport FROM sports WHERE username = ?"
