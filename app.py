@@ -17,6 +17,7 @@ def get_db_connection():
 def hash_password(password):
     """Hash password using PBKDF2-HMAC-SHA256 with salt"""
     import secrets
+    import hashlib
     salt = secrets.token_bytes(16)
     iterations = 100000
     hashed = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, iterations)
