@@ -76,6 +76,13 @@ jobs:
       
       - name: Run OWASP ZAP Full Scan
         run: |
+          # Configuration Notes for Test/Research Environment:
+          # 1. HIGH attack strength + LOW threshold = aggressive scanning (intentional for vulnerability research)
+          # 2. This targets a deliberately vulnerable test application (not production)
+          # 3. Cookie ignore list cleared to test all cookies (acceptable for isolated test environment)
+          # 4. AJAX spider enabled via -a flag; config options tune duration/browsers
+          # 5. No rate limiting needed as target is controlled test environment
+          
           docker run --name zap-scan \
             --user root \
             -v "dast-reports-vol:/zap/wrk:rw" \
@@ -99,11 +106,6 @@ jobs:
                 -config ajaxSpider.numberOfBrowsers=1 \
                 -config ajaxSpider.maxDuration=10"
         continue-on-error: true
-      
-      # Configuration notes:
-      # - rules.cookie.ignorelist cleared to enable testing of all cookies including session/auth cookies
-      # - AJAX spider runs for 10 minutes to discover dynamic endpoints while balancing total scan time
-      # - Thread count set to 5 per host for optimal performance without overwhelming the target
       
       - name: Copy reports from Docker volume
         run: |
