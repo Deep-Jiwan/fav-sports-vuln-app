@@ -86,7 +86,9 @@ jobs:
                 -config spider.maxDuration=60 \
                 -config scanner.maxRuleDurationInMins=60 \
                 -config rules.cookie.ignorelist= \
-                -config scanner.threadPerHost=5"
+                -config scanner.threadPerHost=5 \
+                -config ajaxSpider.numberOfBrowsers=1 \
+                -config ajaxSpider.maxDuration=5"
         continue-on-error: true
       
       - name: Copy reports from Docker volume
@@ -115,6 +117,7 @@ jobs:
           - Alert Threshold: LOW
           - Spider Duration: 60 minutes
           - Scanner Duration: 60 minutes
+          - AJAX Spider: Enabled (5 minutes)
           - SSTI Detection: Enabled (Jinja2 payloads)
           - Thread Per Host: 5
           
@@ -125,7 +128,7 @@ jobs:
           
           The scan includes:
           - Active scanning with HIGH attack strength
-          - Advanced spider crawling
+          - Advanced spider crawling (traditional + AJAX)
           - Custom SSTI detection payloads
           - Comprehensive vulnerability detection
           - Request/response details
@@ -183,6 +186,7 @@ jobs:
           echo "- Alert Threshold: LOW" >> $GITHUB_STEP_SUMMARY
           echo "- Spider Duration: 60 minutes" >> $GITHUB_STEP_SUMMARY
           echo "- Scanner Duration: 60 minutes" >> $GITHUB_STEP_SUMMARY
+          echo "- AJAX Spider: Enabled (5 minutes)" >> $GITHUB_STEP_SUMMARY
           echo "- SSTI Detection: Enabled" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Artifacts uploaded:**" >> $GITHUB_STEP_SUMMARY
