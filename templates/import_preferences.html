@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Preferences - Sports Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📥 Import Preferences</h1>
+            <p class="tagline">Restore your saved preferences from backup</p>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="{{ url_for('index') }}">← Back to Home</a>
+        </nav>
+
+        <main>
+            <section class="form-section">
+                <h2>Restore Your Preferences</h2>
+                <p>Have a backup of your preferences? Paste your backup code below to restore your settings, favorite sports, and profile information.</p>
+                
+                <form method="POST" action="{{ url_for('import_preferences') }}">
+                    <div class="form-group">
+                        <label for="backup_data">Backup Code:</label>
+                        <textarea 
+                            id="backup_data" 
+                            name="backup_data" 
+                            rows="6" 
+                            placeholder="Paste your backup code here..."
+                            required
+                        ></textarea>
+                        <small>Enter the backup code you received when exporting your preferences</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-icon">📥</span>
+                        Import Preferences
+                    </button>
+                </form>
+            </section>
+
+            {% if result %}
+            <section class="result-section success">
+                <h3>✅ Import Successful</h3>
+                <div class="result-box">
+                    <p>Your preferences have been restored:</p>
+                    <pre>{{ result }}</pre>
+                </div>
+            </section>
+            {% endif %}
+
+            {% if error %}
+            <section class="result-section error">
+                <h3>⚠️ Import Failed</h3>
+                <div class="result-box">
+                    <p>There was a problem importing your backup:</p>
+                    <pre>{{ error }}</pre>
+                    <p style="margin-top: 1rem;">Please make sure you're using a valid backup code.</p>
+                </div>
+            </section>
+            {% endif %}
+
+            <section class="info-section">
+                <h3>ℹ️ About Backups</h3>
+                <p>Your backup code contains an encrypted snapshot of your preferences including:</p>
+                <ul style="margin-left: 1.5rem; color: var(--text-secondary);">
+                    <li>Favorite sports and activities</li>
+                    <li>Profile customization settings</li>
+                    <li>Notification preferences</li>
+                    <li>Privacy settings</li>
+                </ul>
+                <p style="margin-top: 1rem;">Keep your backup code safe. You can use it to restore your settings on any device.</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Sports Tracker. Stay Active, Stay Healthy.</p>
+        </footer>
+    </div>
+</body>
+</html>

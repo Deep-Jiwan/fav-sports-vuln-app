@@ -57,6 +57,22 @@
                         Search Users
                     </a>
                 </div>
+                
+                <h2 style="margin-top: 2rem;">Member Features</h2>
+                <div class="button-group">
+                    <a href="{{ url_for('preview_message') }}" class="btn btn-secondary">
+                        <span class="btn-icon">✉️</span>
+                        Customize Message
+                    </a>
+                    <a href="{{ url_for('profile', user_id=1) }}" class="btn btn-secondary">
+                        <span class="btn-icon">👥</span>
+                        Browse Community
+                    </a>
+                    <a href="{{ url_for('import_preferences') }}" class="btn btn-secondary">
+                        <span class="btn-icon">📥</span>
+                        Import Backup
+                    </a>
+                </div>
             </section>
         </main>
 

@@ -80,7 +80,6 @@ A modern, clean web application for tracking users' favorite sports. Built with 
 ## Security Features
 
 - Password hashing using SHA-256
-- SQL injection prevention using parameterized queries
 - Input validation on all forms
 - Proper error handling
 

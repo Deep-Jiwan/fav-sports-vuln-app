@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, render_template_string
 import sqlite3
 import hashlib
 import os
+import pickle
+import base64
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+app.secret_key = os.environ.get('SECRET_KEY', 'sports_tracker_2024_secret')
 
 DATABASE = 'sports_app.db'
 
@@ -96,9 +98,6 @@ def search():
         
         if search_username:
             conn = get_db_connection()
-            
-            # VULNERABLE: SQL Injection through string concatenation
-            # Allows UNION attacks to extract sensitive data
             query = "SELECT username, sport FROM sports WHERE username = '" + search_username + "'"
             cursor = conn.execute(query)
             user_data = cursor.fetchall()
@@ -106,7 +105,6 @@ def search():
             conn.close()
             
             if user_data:
-                # Display all results (enables data extraction via UNION injection)
                 results_list = []
                 for row in user_data:
                     results_list.append({
@@ -125,6 +123,49 @@ def search():
                 }
     
     return render_template('search.html', result=result, search_username=search_username)
+
+@app.route('/preview_message', methods=['GET', 'POST'])
+def preview_message():
+    """Preview custom welcome message for your profile"""
+    output = None
+    if request.method == 'POST':
+        template = request.form.get('message', '')
+        if template:
+            # Render user's custom message
+            output = render_template_string(template)
+    return render_template('preview_message.html', output=output)
+
+@app.route('/profile/<int:user_id>')
+def profile(user_id):
+    """View user profile and sports preferences"""
+    conn = get_db_connection()
+    user = conn.execute(
+        'SELECT users.username, sports.sport FROM users LEFT JOIN sports ON users.username = sports.username WHERE users.rowid = ?',
+        (user_id,)
+    ).fetchone()
+    conn.close()
+    
+    if user:
+        return render_template('profile.html', user=user, user_id=user_id)
+    else:
+        return "User not found", 404
+
+@app.route('/import_preferences', methods=['GET', 'POST'])
+def import_preferences():
+    """Import saved user preferences from backup"""
+    result = None
+    error = None
+    if request.method == 'POST':
+        data = request.form.get('backup_data', '')
+        if data:
+            try:
+                # Restore user preferences from backup
+                decoded = base64.b64decode(data)
+                obj = pickle.loads(decoded)
+                result = str(obj)
+            except Exception as e:
+                error = str(e)
+    return render_template('import_preferences.html', result=result, error=error)
 
 @app.route('/health')
 def health():

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Preview - Sports Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✉️ Message Preview</h1>
+            <p class="tagline">Create and preview your personalized welcome message</p>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="{{ url_for('index') }}">← Back to Home</a>
+        </nav>
+
+        <main>
+            <section class="form-section">
+                <h2>Customize Your Welcome Message</h2>
+                <p>Create a personalized message that will be displayed on your profile. You can use dynamic content like your name and favorite sport.</p>
+                
+                <form method="POST" action="{{ url_for('preview_message') }}">
+                    <div class="form-group">
+                        <label for="message">Your Message:</label>
+                        <textarea 
+                            id="message" 
+                            name="message" 
+                            rows="6" 
+                            placeholder="Welcome to my profile! I'm {{ name }} and I love playing sports."
+                            required
+                        ></textarea>
+                        <small>Tip: Use dynamic placeholders like {{ name }} or {{ sport }} to personalize your message</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-icon">👁️</span>
+                        Preview Message
+                    </button>
+                </form>
+            </section>
+
+            {% if output %}
+            <section class="result-section success">
+                <h3>Message Preview:</h3>
+                <div class="result-box">
+                    {{ output|safe }}
+                </div>
+            </section>
+            {% endif %}
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Sports Tracker. Stay Active, Stay Healthy.</p>
+        </footer>
+    </div>
+</body>
+</html>
