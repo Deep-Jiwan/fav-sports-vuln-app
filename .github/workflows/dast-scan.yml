@@ -29,14 +29,25 @@ jobs:
           cat > ssti-hook.py << 'EOF'
           """
           ZAP Active Scan Hook for Server-Side Template Injection (SSTI) Detection
-          Tests common SSTI payloads for Jinja2, Twig, Freemarker, and other template engines
+          
+          This hook documents common SSTI payloads that should be tested manually
+          or via ZAP's fuzzer for Jinja2, Twig, Freemarker, and other template engines.
+          
+          Note: ZAP's active scanner will still test for injection vulnerabilities.
+          This hook serves as documentation and can be extended with ZAP API calls
+          to register custom scan rules if needed in the future.
+          
+          For production use, consider:
+          1. Using ZAP's Fuzzer with these payloads via the API
+          2. Creating custom active scan rules
+          3. Using authentication contexts for authenticated scanning
           """
           
           def zap_started(zap, target):
-              """Called when ZAP starts - configure custom payloads for SSTI detection"""
-              print("[SSTI Hook] Configuring custom SSTI detection payloads")
+              """Called when ZAP starts - logs SSTI payloads for reference"""
+              print("[SSTI Hook] SSTI Detection Hook Loaded")
               
-              # SSTI payloads for Jinja2 (Flask/Django)
+              # SSTI payloads for Jinja2 (Flask/Django) - for documentation/future use
               ssti_payloads = [
                   "{{7*7}}",                           # Basic math evaluation
                   "{{7*'7'}}",                         # String multiplication
@@ -50,12 +61,10 @@ jobs:
                   "{% for item in config %}{{item}}{% endfor %}", # Loop construct
               ]
               
-              # Add payloads to fuzzer for all input vectors
-              print(f"[SSTI Hook] Added {len(ssti_payloads)} SSTI detection payloads")
-              print("[SSTI Hook] Payloads will be tested against form inputs and URL parameters")
+              print(f"[SSTI Hook] Documented {len(ssti_payloads)} SSTI payloads for Jinja2")
+              print("[SSTI Hook] ZAP's active scanner will test for template injection patterns")
+              print("[SSTI Hook] HIGH attack strength enables more comprehensive payload testing")
               
-              # Note: The actual payload injection is handled by ZAP's fuzzer
-              # This hook ensures ZAP knows to look for template injection patterns
               return True
           EOF
           
@@ -88,8 +97,13 @@ jobs:
                 -config rules.cookie.ignorelist= \
                 -config scanner.threadPerHost=5 \
                 -config ajaxSpider.numberOfBrowsers=1 \
-                -config ajaxSpider.maxDuration=5"
+                -config ajaxSpider.maxDuration=10"
         continue-on-error: true
+      
+      # Configuration notes:
+      # - rules.cookie.ignorelist cleared to enable testing of all cookies including session/auth cookies
+      # - AJAX spider runs for 10 minutes to discover dynamic endpoints while balancing total scan time
+      # - Thread count set to 5 per host for optimal performance without overwhelming the target
       
       - name: Copy reports from Docker volume
         run: |
@@ -117,9 +131,10 @@ jobs:
           - Alert Threshold: LOW
           - Spider Duration: 60 minutes
           - Scanner Duration: 60 minutes
-          - AJAX Spider: Enabled (5 minutes)
+          - AJAX Spider: Enabled (10 minutes)
           - SSTI Detection: Enabled (Jinja2 payloads)
           - Thread Per Host: 5
+          - Cookie Testing: All cookies (no ignore list)
           
           This report contains security findings from OWASP ZAP full active scan.
           Available formats:
@@ -186,8 +201,9 @@ jobs:
           echo "- Alert Threshold: LOW" >> $GITHUB_STEP_SUMMARY
           echo "- Spider Duration: 60 minutes" >> $GITHUB_STEP_SUMMARY
           echo "- Scanner Duration: 60 minutes" >> $GITHUB_STEP_SUMMARY
-          echo "- AJAX Spider: Enabled (5 minutes)" >> $GITHUB_STEP_SUMMARY
+          echo "- AJAX Spider: Enabled (10 minutes)" >> $GITHUB_STEP_SUMMARY
           echo "- SSTI Detection: Enabled" >> $GITHUB_STEP_SUMMARY
+          echo "- Cookie Testing: All cookies" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Artifacts uploaded:**" >> $GITHUB_STEP_SUMMARY
           echo "- full-scan-report.json (Machine-readable)" >> $GITHUB_STEP_SUMMARY
