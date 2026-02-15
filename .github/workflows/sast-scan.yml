@@ -8,7 +8,7 @@ on:
 jobs:
   sast-scan:
     name: Run SAST Analysis
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write

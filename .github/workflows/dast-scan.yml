@@ -8,7 +8,7 @@ on:
 jobs:
   dast-scan:
     name: Run DAST Analysis with ZAP
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
