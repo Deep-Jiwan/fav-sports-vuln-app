@@ -35,11 +35,22 @@ jobs:
         run: |
           nohup python app.py > app.log 2>&1 &
           echo $! > app.pid
-          # Wait for app to be ready
-          sleep 5
-          # Verify app is running
-          curl -f http://localhost:3000/health || (cat app.log && exit 1)
-          echo "Flask app started successfully on localhost:3000"
+          
+          # Wait for app to be ready with retry logic
+          echo "Waiting for Flask app to start..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000/health 2>/dev/null; then
+              echo "Flask app started successfully on localhost:3000"
+              exit 0
+            fi
+            echo "Attempt $i/30: App not ready yet..."
+            sleep 1
+          done
+          
+          # If we get here, the app failed to start
+          echo "Failed to start Flask app after 30 seconds"
+          cat app.log
+          exit 1
       
       - name: Prepare Docker volume & container
         run: |
@@ -148,13 +159,23 @@ jobs:
         run: |
           if [ -f app.pid ]; then
             APP_PID=$(cat app.pid)
+            echo "Stopping Flask app (PID: $APP_PID)..."
             kill $APP_PID 2>/dev/null || true
+            
+            # Wait a moment and verify it stopped
+            sleep 2
+            if ps -p $APP_PID > /dev/null 2>&1; then
+              echo "Process still running, forcing with SIGKILL..."
+              kill -9 $APP_PID 2>/dev/null || true
+            fi
+            
             rm app.pid
+            echo "Flask app stopped"
           fi
       
       - name: Generate scan summary
         run: |
-          cat > dast-reports/scan-summary.txt << 'EOF'
+          cat > dast-reports/scan-summary.txt << EOF
           ======================================
           OWASP ZAP DAST Full Active Scan Report
           ======================================
