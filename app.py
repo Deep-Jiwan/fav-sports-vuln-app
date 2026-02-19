@@ -160,8 +160,8 @@ def import_preferences():
         if data:
             try:
                 # Restore user preferences from backup
-                decoded = base64.b64decode(data)
-                obj = pickle.loads(decoded)
+                decoded = base64.b64decode(data, validate=True)
+                obj = decoded.decode('utf-8', 'replace')
                 result = str(obj)
             except Exception as e:
                 error = str(e)
