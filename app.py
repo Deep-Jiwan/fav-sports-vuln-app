@@ -133,7 +133,7 @@ def preview_message():
         template = request.form.get('message', '')
         if template:
             # Render user's custom message
-            output = render_template_string(template)
+            output = render_template_string("{{ message }}", message=template)
     return render_template('preview_message.html', output=output)
 
 @app.route('/profile/<int:user_id>')
