@@ -135,7 +135,9 @@ def preview_message():
         template = request.form.get('message', '')
         if template:
             # Render user's custom message
-            output = render_template_string(template)
+            # SECURITY FIX: Escape user input to prevent template injection
+            from markupsafe import escape
+            output = render_template_string("{{ content }}", content=escape(template))
     return render_template('preview_message.html', output=output)
 
 @app.route('/profile/<int:user_id>')
