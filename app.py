@@ -160,7 +160,9 @@ def import_preferences():
             try:
                 # Restore user preferences from backup
                 decoded = base64.b64decode(data)
-                obj = pickle.loads(decoded)
+                # Safe deserialization - only allow simple data structures
+                import json
+                obj = json.loads(decoded.decode('utf-8'))
                 result = str(obj)
             except Exception as e:
                 error = str(e)
