@@ -5,8 +5,10 @@ import hashlib
 DATABASE = 'sports_app.db'
 
 def hash_password(password):
-    """Hash password using SHA-256"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash password using bcrypt"""
+    import bcrypt
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode(), salt).decode()
 
 def populate_sample_data(conn):
     """Add sample users and their sports preferences"""
