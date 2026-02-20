@@ -17,10 +17,12 @@ def get_db_connection():
     return conn
 
 def hash_password(password):
-    """Hash password using bcrypt"""
-    import bcrypt
-    salt = bcrypt.gensalt()
-    return bcrypt.hashpw(password.encode(), salt).decode()
+    """Hash password using SHA-256 with salt and iterations"""
+    import hashlib
+    import os
+    salt = os.urandom(16)
+    iterations = 100000
+    return hashlib.pbkdf2_hmac('sha256', password.encode(), salt, iterations).hex()
 
 @app.route('/')
 def index():
