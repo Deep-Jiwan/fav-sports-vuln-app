@@ -17,8 +17,9 @@ def get_db_connection():
     return conn
 
 def hash_password(password):
-    """Hash password using SHA-256"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash password using bcrypt"""
+    import bcrypt
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 @app.route('/')
 def index():
