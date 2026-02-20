@@ -159,9 +159,9 @@ def import_preferences():
         data = request.form.get('backup_data', '')
         if data:
             try:
-                # Restore user preferences from backup
+                # Restore user preferences from backup - using JSON for safe deserialization
                 decoded = base64.b64decode(data)
-                obj = pickle.loads(decoded)
+                obj = json.loads(decoded.decode('utf-8'))
                 result = str(obj)
             except Exception as e:
                 error = str(e)
