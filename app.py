@@ -98,8 +98,10 @@ def search():
         
         if search_username:
             conn = get_db_connection()
-            query = "SELECT username, sport FROM sports WHERE username = '" + search_username + "'"
-            cursor = conn.execute(query)
+            cursor = conn.execute(
+                "SELECT username, sport FROM sports WHERE username = ?",
+                (search_username,)
+            )
             user_data = cursor.fetchall()
             
             conn.close()
